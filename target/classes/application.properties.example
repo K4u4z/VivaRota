@@ -1,0 +1,13 @@
+# Configurações de Banco de Dados
+spring.datasource.url=jdbc:postgresql://localhost:5432/vivarota_db
+spring.datasource.username=postgres
+spring.datasource.password=SUA_SENHA_AQUI
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# Configurações de JPA
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+
+# Segurança
+api.security.token.secret=${JWT_SECRET:minha_chave_secreta_padrao_123}
