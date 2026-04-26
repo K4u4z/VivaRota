@@ -1,25 +1,31 @@
 package com.VivaRota.VivaRota_API.entities;
 
+import com.VivaRota.VivaRota_API.entities.enums.TipoIncidente;
 import jakarta.persistence.*;
-
-import java.awt.*;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.locationtech.jts.geom.Point; // Import correto para PostGIS
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "incidentes") // Nome atualizado
+@Table(name = "incidentes")
+@Getter
+@Setter
 public class Incidente {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String tipo;
+    private TipoIncidente tipo;
 
     private String descricao;
 
@@ -29,116 +35,28 @@ public class Incidente {
     @Column(nullable = false)
     private Double longitude;
 
-    // Campo geográfico (PostGIS) - O banco preenche via TRIGGER
     @Column(columnDefinition = "geography(Point, 4326)", insertable = false, updatable = false)
     private Point localizacao;
+
+
 
     private String endereco;
 
     private Integer confirmacoes = 0;
 
-    @Column(nullable = false)
-    private String status = "ativo";
+    @CreationTimestamp
+    @Column(name = "criado_em", updatable = false)
+    private LocalDateTime criadoEm;
 
-    @Column(name = "criado_em")
-    private LocalDateTime criadoEm = LocalDateTime.now();
-
-    @Column(name = "expira_em")
-    private LocalDateTime expiraEm = LocalDateTime.now().plusHours(2);
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public Usuario getUsuario() {
-        return usuario;
-    }
-
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
-    }
-
-    public String getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    }
-
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
-    }
-
-    public Double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
-    }
-
-    public Double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(Double longitude) {
-        this.longitude = longitude;
-    }
-
-    public Point getLocalizacao() {
-        return localizacao;
-    }
-
-    public void setLocalizacao(Point localizacao) {
-        this.localizacao = localizacao;
-    }
-
-    public String getEndereco() {
-        return endereco;
-    }
-
-    public void setEndereco(String endereco) {
-        this.endereco = endereco;
-    }
-
-    public Integer getConfirmacoes() {
-        return confirmacoes;
-    }
-
-    public void setConfirmacoes(Integer confirmacoes) {
-        this.confirmacoes = confirmacoes;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public LocalDateTime getCriadoEm() {
-        return criadoEm;
-    }
-
-    public void setCriadoEm(LocalDateTime criadoEm) {
-        this.criadoEm = criadoEm;
-    }
-
-    public LocalDateTime getExpiraEm() {
-        return expiraEm;
-    }
-
-    public void setExpiraEm(LocalDateTime expiraEm) {
-        this.expiraEm = expiraEm;
+    @Override
+    public String toString() {
+        return "Incidente{" +
+                "id=" + id +
+                ", tipo=" + tipo +
+                ", latitude=" + latitude +
+                ", longitude=" + longitude +
+                ", endereco='" + endereco + '\'' +
+                ", criadoEm=" + criadoEm +
+                '}';
     }
 }

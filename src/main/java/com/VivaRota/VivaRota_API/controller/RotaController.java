@@ -38,4 +38,6 @@ public class RotaController {
         RotaResponseDTO resposta = rotaService.calcularRotaNormal(dto, userDetails.getUsername());
         return ResponseEntity.ok(resposta);
     }
+
+
 }

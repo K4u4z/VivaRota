@@ -35,40 +35,61 @@ public class IncidenteService {
         incidente.setLongitude(dto.getLongitude());
         incidente.setEndereco(dto.getEndereco());
 
-        // Incrementa total de reports do usuário
+        // Gamificação: Incrementa o histórico do usuário
         usuario.setTotalReports(usuario.getTotalReports() + 1);
         usuarioRepository.save(usuario);
 
         return incidenteRepository.save(incidente);
     }
 
-    // Buscar incidentes próximos a uma coordenada (para exibir no mapa)
+    // Buscar por ID
+    public Incidente buscarPorId(UUID id) {
+        return incidenteRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Incidente não encontrado."));
+    }
+
+    // Listar todos os incidentes de um usuário específico
+    public List<Incidente> listarPorUsuario(String emailUsuario) {
+        return incidenteRepository.findByUsuarioEmail(emailUsuario);
+    }
+
+    // Buscar próximos (Mapa / PostGIS)
     public List<Incidente> buscarProximos(Double lat, Double lng, Double raioMetros) {
         return incidenteRepository.buscarIncidentesProximos(lat, lng, raioMetros);
     }
 
-    // Confirmar que um incidente ainda está acontecendo
+    // Confirmar incidente (Aumenta relevância)
     public Incidente confirmar(UUID id) {
-        Incidente incidente = incidenteRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Incidente não encontrado."));
-
+        Incidente incidente = buscarPorId(id);
         incidente.setConfirmacoes(incidente.getConfirmacoes() + 1);
         return incidenteRepository.save(incidente);
     }
 
-    // Marcar incidente como resolvido ("Já passou")
-    public Incidente resolver(UUID id) {
-        Incidente incidente = incidenteRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Incidente não encontrado."));
+    // Atualizar (Apenas se for o dono)
+    public Incidente atualizar(UUID id, IncidenteRequestDTO dto, String emailUsuario) {
+        Incidente incidente = buscarPorId(id);
 
-        incidente.setStatus("resolvido");
+        if (!incidente.getUsuario().getEmail().equals(emailUsuario)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado: Você não é o proprietário deste reporte.");
+        }
+
+        incidente.setTipo(dto.getTipo());
+        incidente.setDescricao(dto.getDescricao());
+        incidente.setLatitude(dto.getLatitude());
+        incidente.setLongitude(dto.getLongitude());
+        incidente.setEndereco(dto.getEndereco());
+
         return incidenteRepository.save(incidente);
     }
 
-    // Buscar todos os incidentes ativos (para o mapa geral)
-    public List<Incidente> buscarAtivos() {
-        return incidenteRepository.findAll().stream()
-                .filter(i -> "ativo".equals(i.getStatus()))
-                .toList();
+
+    public void deletarIncidente(UUID id, String emailUsuario) {
+        Incidente incidente = buscarPorId(id);
+
+        if (!incidente.getUsuario().getEmail().equals(emailUsuario)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado: Você não tem permissão para excluir este reporte.");
+        }
+
+        incidenteRepository.delete(incidente);
     }
 }

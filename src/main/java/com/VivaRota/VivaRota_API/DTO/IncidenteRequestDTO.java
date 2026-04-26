@@ -1,12 +1,25 @@
 package com.VivaRota.VivaRota_API.DTO;
 
-import jakarta.validation.constraints.NotBlank;
+import com.VivaRota.VivaRota_API.entities.enums.TipoIncidente;
 import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
+import java.util.UUID;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class IncidenteRequestDTO {
 
-    @NotBlank(message = "O tipo do incidente é obrigatório.")
-    private String tipo;
+    @NotNull(message = "O ID do usuário é obrigatório.")
+    private UUID usuarioId;
+
+    @NotNull(message = "O tipo do incidente é obrigatório.")
+    private TipoIncidente tipo;
 
     private String descricao;
 
@@ -18,18 +31,4 @@ public class IncidenteRequestDTO {
 
     private String endereco;
 
-    public String getTipo() { return tipo; }
-    public void setTipo(String tipo) { this.tipo = tipo; }
-
-    public String getDescricao() { return descricao; }
-    public void setDescricao(String descricao) { this.descricao = descricao; }
-
-    public Double getLatitude() { return latitude; }
-    public void setLatitude(Double latitude) { this.latitude = latitude; }
-
-    public Double getLongitude() { return longitude; }
-    public void setLongitude(Double longitude) { this.longitude = longitude; }
-
-    public String getEndereco() { return endereco; }
-    public void setEndereco(String endereco) { this.endereco = endereco; }
 }
