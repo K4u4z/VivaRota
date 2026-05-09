@@ -1,6 +1,15 @@
-import { Incidente, INCIDENTE_CONFIG } from '@/constants/mockIncidentes';
+import { Incidente } from '@/services/alertas';
 import MapboxGL from '@rnmapbox/maps';
 import { StyleSheet, Text, View } from 'react-native';
+
+const INCIDENTE_CONFIG: Record<string, { cor: string; emoji: string; label: string }> = {
+  ASSALTO:        { cor: '#E63946', emoji: '🔴', label: 'Assalto' },
+  ASSEDIO:        { cor: '#9B2226', emoji: '⚠️', label: 'Assédio' },
+  SEM_ILUMINACAO: { cor: '#F4A261', emoji: '🌑', label: 'Sem Iluminação' },
+  AREA_ISOLADA:   { cor: '#8338EC', emoji: '🚷', label: 'Área Isolada' },
+  ACIDENTE:       { cor: '#3A86FF', emoji: '🚨', label: 'Acidente' },
+  OUTROS:         { cor: '#6C757D', emoji: '❗', label: 'Outros' },
+};
 
 interface Props {
   incidentes: Incidente[];
@@ -11,9 +20,9 @@ export function MarkerIncidente({ incidentes, onPress }: Props) {
   return (
     <>
       {incidentes
-        .filter(i => i.status === 'ativo')
+        .filter(i => i.status === 'ATIVO' || i.status === null || !i.status)
         .map(incidente => {
-          const config = INCIDENTE_CONFIG[incidente.tipo];
+          const config = INCIDENTE_CONFIG[incidente.tipo] ?? INCIDENTE_CONFIG['OUTROS'];
           return (
             <MapboxGL.PointAnnotation
               key={incidente.id}
