@@ -11,7 +11,6 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -27,7 +26,7 @@ public class SecurityConfig {
     private UsuarioService usuarioService;
 
     @Autowired
-    private PasswordEncoder passwordEncoder; // ← injeta ao invés de criar
+    private PasswordEncoder passwordEncoder;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -46,6 +45,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/v3/api-docs"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/incidentes/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
@@ -59,7 +59,7 @@ public class SecurityConfig {
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider =
                 new DaoAuthenticationProvider(usuarioService);
-        provider.setPasswordEncoder(passwordEncoder); // ← usa o injetado
+        provider.setPasswordEncoder(passwordEncoder);
         return provider;
     }
 
@@ -68,6 +68,4 @@ public class SecurityConfig {
             AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
-
-
 }
