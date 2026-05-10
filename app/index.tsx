@@ -1,8 +1,17 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Colors } from '@/constants/Colors';
+import { limparSessao, recuperarSessao } from '@/services/auth';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Colors } from '@/constants/Colors';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+type Sessao = {
+  token: string;
+  usuarioId: number;
+  nome: string;
+  email: string;
+};
 
 type NavCard = {
   title: string;
@@ -33,18 +42,45 @@ const CARDS: NavCard[] = [
 ];
 
 export default function Index() {
+  const [sessao, setSessao] = useState<Sessao | null | 'carregando'>('carregando');
+
+  useEffect(() => {
+    recuperarSessao().then(s => {
+      setSessao(s);
+      if (!s) {
+        setTimeout(() => router.replace('/login'), 100);
+      }
+    });
+  }, []);
+
+  if (sessao === 'carregando') {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </View>
+    );
+  }
+
+  if (!sessao) return null;
+
+  const handleLogout = async () => {
+    await limparSessao();
+    router.replace('/login');
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <View style={styles.logoRow}>
           <MaterialCommunityIcons name="map-marker-radius" size={32} color={Colors.primary} />
           <Text style={styles.appName}>VivaRota</Text>
+          <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
+            <MaterialCommunityIcons name="logout" size={20} color={Colors.textMuted} />
+          </TouchableOpacity>
         </View>
-        <Text style={styles.tagline}>Navegação segura para pedestres</Text>
+        <Text style={styles.tagline}>Olá, {sessao.nome} 👋</Text>
       </View>
 
-      {/* Nav cards */}
       <View style={styles.cards}>
         {CARDS.map(card => (
           <TouchableOpacity
@@ -65,7 +101,6 @@ export default function Index() {
         ))}
       </View>
 
-      {/* SOS hint */}
       <View style={styles.sosBanner}>
         <MaterialCommunityIcons name="alarm-light" size={18} color={Colors.emergency} />
         <Text style={styles.sosText}>
@@ -77,13 +112,13 @@ export default function Index() {
 }
 
 const styles = StyleSheet.create({
+  loading: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.background },
   container: { flex: 1, backgroundColor: Colors.background, padding: 24 },
-
   header: { marginTop: 16, marginBottom: 40 },
   logoRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 6 },
-  appName: { fontSize: 32, fontWeight: '800', color: Colors.primary },
+  appName: { fontSize: 32, fontWeight: '800', color: Colors.primary, flex: 1 },
+  logoutBtn: { padding: 4 },
   tagline: { fontSize: 15, color: Colors.textSecondary },
-
   cards: { gap: 12, marginBottom: 32 },
   card: {
     flexDirection: 'row',
@@ -95,17 +130,10 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     gap: 14,
   },
-  cardIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  cardIcon: { width: 52, height: 52, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   cardText: { flex: 1 },
   cardTitle: { fontSize: 16, fontWeight: '700', color: Colors.text, marginBottom: 3 },
   cardSub: { fontSize: 13, color: Colors.textSecondary, lineHeight: 18 },
-
   sosBanner: {
     flexDirection: 'row',
     alignItems: 'flex-start',

@@ -1,3 +1,9 @@
+import { Colors } from '@/constants/Colors';
+import { INCIDENT_TYPES, type IncidentType } from '@/constants/incidentTypes';
+import { reportarIncidente } from '@/services/incidentes';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import * as Location from 'expo-location';
+import { router, Stack } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -11,11 +17,6 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import * as Location from 'expo-location';
-import { router, Stack } from 'expo-router';
-import { Colors } from '@/constants/Colors';
-import { INCIDENT_TYPES, type IncidentType } from '@/constants/incidentTypes';
 
 type Coords = { latitude: number; longitude: number };
 
@@ -46,7 +47,6 @@ function TypeCard({
   );
 }
 
-// Grupos de 3 para a grade
 const ROWS = [INCIDENT_TYPES.slice(0, 3), INCIDENT_TYPES.slice(3, 6)];
 
 export default function ReportarIncidente() {
@@ -84,24 +84,37 @@ export default function ReportarIncidente() {
       Alert.alert('Tipo obrigatório', 'Selecione o tipo de ocorrência.');
       return;
     }
+    if (!coords) {
+      Alert.alert('GPS necessário', 'Aguarde o GPS ser capturado ou tente novamente.');
+      return;
+    }
+
     setSubmitting(true);
     try {
-      // TODO: POST http://<ip>:8080/api/incidentes
-      // { typeId: selectedType, description, latitude: coords?.latitude, longitude: coords?.longitude }
-      await new Promise(r => setTimeout(r, 1200));
+      await reportarIncidente({
+        tipo: selectedType,
+        descricao: description,
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+      });
       Alert.alert(
         'Reporte enviado!',
         'Obrigado por contribuir com a segurança da comunidade.',
         [{ text: 'OK', onPress: () => router.back() }],
       );
-    } catch {
-      Alert.alert('Erro', 'Não foi possível enviar o reporte. Tente novamente.');
+    } catch (error: any) {
+      const status = error?.response?.status;
+      if (status === 401 || status === 403) {
+        Alert.alert('Erro', 'Você precisa estar logado para reportar um incidente.');
+      } else {
+        Alert.alert('Erro', 'Não foi possível enviar o reporte. Tente novamente.');
+      }
     } finally {
       setSubmitting(false);
     }
   };
 
-  const canSubmit = !!selectedType && !submitting;
+  const canSubmit = !!selectedType && !submitting && !!coords;
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
