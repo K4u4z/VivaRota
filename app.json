@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "VivaRota",
-    "slug": "vivarota-app",
+    "slug": "VivaRota-App",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -45,8 +45,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "55790b75-a36c-4907-bf00-189ad5603cd1"
+        "projectId": "df3ddfb3-0aa5-4151-b3b0-308b1d796599"
       }
-    }
+    },
+    "owner": "leo.work2077"
   }
 }

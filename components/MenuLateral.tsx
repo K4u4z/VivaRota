@@ -1,5 +1,6 @@
 import { useAuthStore } from "@/services/authStore";
 import { useEffect, useRef } from "react";
+import { router } from "expo-router";
 import {
   Animated,
   Image,
@@ -59,7 +60,7 @@ export function MenuLateral({ aberto, onFechar }: Props) {
         <View style={styles.divider} />
 
         {/* Perfil */}
-        <TouchableOpacity style={styles.menuItem} activeOpacity={0.7}>
+        <TouchableOpacity style={styles.menuItem} activeOpacity={0.7} onPress={() => { onFechar(); setTimeout(() => router.push("/perfil"), 300); }}>
           <View style={styles.menuIcone}>
             <Text style={styles.menuIconeTexto}>👤</Text>
           </View>

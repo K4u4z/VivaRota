@@ -90,6 +90,7 @@ export default function ReportarIncidente() {
     }
 
     setSubmitting(true);
+    console.log('🚨 TENTANDO REPORTAR:', selectedType, coords);
     try {
       await reportarIncidente({
         tipo: selectedType,

@@ -1,4 +1,4 @@
-import api from '@/services/api';
+import { api } from '@/services/api';
 import { limparSessao, recuperarSessao } from '@/services/auth';
 import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
@@ -34,15 +34,7 @@ export default function PerfilScreen() {
 
   const carregarPerfil = async () => {
     try {
-      const sessao = await recuperarSessao();
-      if (!sessao) {
-        router.replace('/login');
-        return;
-      }
-      const token = await SecureStore.getItemAsync('vivarota_token');
-      const response = await api.get(`/usuarios/${sessao.usuarioId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/usuarios/me');
       setUsuario(response.data);
     } catch (error) {
       Alert.alert('Erro', 'Não foi possível carregar o perfil.');
