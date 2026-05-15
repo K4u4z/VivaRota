@@ -66,7 +66,7 @@ public class IncidenteService {
     // Confirmar incidente (Aumenta relevância)
     public Incidente confirmar(UUID id) {
         Incidente incidente = buscarPorId(id);
-        incidente.setConfirmacoes(incidente.getConfirmacoes() + 1);
+        incidente.setConfirmacoes((incidente.getConfirmacoes() == null ? 0 : incidente.getConfirmacoes()) + 1);
         return incidenteRepository.save(incidente);
     }
 

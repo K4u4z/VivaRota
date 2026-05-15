@@ -201,7 +201,7 @@ public class RotaService {
 
     private double calcularPerigo(String wkt) {
         Double resultado = jdbcTemplate.queryForObject(
-                "SELECT calcular_perigo_rota(?, 100)",
+                "SELECT calcular_perigo_rota(?, 300)",
                 Double.class,
                 wkt
         );
