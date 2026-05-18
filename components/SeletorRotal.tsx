@@ -19,11 +19,6 @@ const CONFIG = {
     cor: "#F44336",
     corFundo: "#FFEBEE",
   },
-  equilibrada: {
-    label: "⚖️ Equilibrada",
-    cor: "#2196F3",
-    corFundo: "#E3F2FD",
-  },
 };
 
 const NIVEIS: Record<string, string> = {
@@ -34,7 +29,7 @@ const NIVEIS: Record<string, string> = {
 };
 
 export function SeletorRota({ rotas, rotaSelecionada, onSelecionar }: Props) {
-  const tipos: TipoRota[] = ["segura", "equilibrada", "rapida"];
+  const tipos: TipoRota[] = ["segura", "rapida"];
 
   return (
     <View style={styles.container}>

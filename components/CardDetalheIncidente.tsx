@@ -5,6 +5,7 @@ import { useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Modal,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -69,61 +70,80 @@ export function CardDetalheIncidente({ incidente, onFechar }: Props) {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Header colorido */}
-      <View style={[styles.header, { backgroundColor: config.cor }]}>
-        <MaterialCommunityIcons name={config.icone as any} size={24} color="#fff" />
-        <Text style={styles.headerTitle}>{config.label}</Text>
-        <TouchableOpacity onPress={onFechar} style={styles.closeBtn}>
-          <MaterialCommunityIcons name="close" size={20} color="#fff" />
+    <Modal
+      transparent
+      animationType="fade"
+      visible={true}
+      onRequestClose={onFechar}
+    >
+      <TouchableOpacity
+        style={styles.overlay}
+        activeOpacity={1}
+        onPress={onFechar}
+      >
+        <TouchableOpacity activeOpacity={1} onPress={() => {}}>
+          <View style={styles.container}>
+            {/* Header colorido */}
+            <View style={[styles.header, { backgroundColor: config.cor }]}>
+              <MaterialCommunityIcons name={config.icone as any} size={24} color="#fff" />
+              <Text style={styles.headerTitle}>{config.label}</Text>
+              <TouchableOpacity onPress={onFechar} style={styles.closeBtn}>
+                <MaterialCommunityIcons name="close" size={20} color="#fff" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Conteúdo */}
+            <View style={styles.body}>
+              <Text style={styles.tempo}>
+                🕐 {tempoRelativo(incidente.criadoEm)}
+              </Text>
+
+              {incidente.descricao ? (
+                <Text style={styles.descricao}>{incidente.descricao}</Text>
+              ) : null}
+
+              {/* Botões */}
+              <View style={styles.botoes}>
+                <TouchableOpacity
+                  style={[styles.btn, styles.btnConfirmar]}
+                  onPress={handleConfirmar}
+                  disabled={loadingConfirmar}
+                >
+                  {loadingConfirmar
+                    ? <ActivityIndicator color="#fff" size="small" />
+                    : <Text style={styles.btnText}>👍 Confirmar</Text>
+                  }
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.btn, styles.btnPassou]}
+                  onPress={handleJaPassou}
+                  disabled={loadingPassou}
+                >
+                  {loadingPassou
+                    ? <ActivityIndicator color="#2d6a4f" size="small" />
+                    : <Text style={[styles.btnText, { color: '#2d6a4f' }]}>✅ Já passou</Text>
+                  }
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
         </TouchableOpacity>
-      </View>
-
-      {/* Conteúdo */}
-      <View style={styles.body}>
-        <Text style={styles.tempo}>
-          🕐 {tempoRelativo(incidente.criadoEm)}
-        </Text>
-
-        {incidente.descricao ? (
-          <Text style={styles.descricao}>{incidente.descricao}</Text>
-        ) : null}
-
-        {/* Botões */}
-        <View style={styles.botoes}>
-          <TouchableOpacity
-            style={[styles.btn, styles.btnConfirmar]}
-            onPress={handleConfirmar}
-            disabled={loadingConfirmar}
-          >
-            {loadingConfirmar
-              ? <ActivityIndicator color="#fff" size="small" />
-              : <Text style={styles.btnText}>👍 Confirmar</Text>
-            }
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.btn, styles.btnPassou]}
-            onPress={handleJaPassou}
-            disabled={loadingPassou}
-          >
-            {loadingPassou
-              ? <ActivityIndicator color="#2d6a4f" size="small" />
-              : <Text style={[styles.btnText, { color: '#2d6a4f' }]}>✅ Já passou</Text>
-            }
-          </TouchableOpacity>
-        </View>
-      </View>
-    </View>
+      </TouchableOpacity>
+    </Modal>
   );
 }
 
 const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
   container: {
-    position: 'absolute',
-    bottom: 24,
-    left: 16,
-    right: 16,
+    width: '100%',
     backgroundColor: '#fff',
     borderRadius: 20,
     overflow: 'hidden',

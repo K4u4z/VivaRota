@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { geocodificarEndereco } from '../services/mapbox';
 import { calcularRotasBackend, RotaOpcao, RotaResponse } from '../services/rotas';
 
-export type TipoRota = 'segura' | 'rapida' | 'equilibrada';
+export type TipoRota = 'segura' | 'rapida';
 
 export function useRota() {
   const [destino, setDestino] = useState<[number, number] | null>(null);
@@ -11,16 +11,11 @@ export function useRota() {
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
-  // Rota ativa baseada na seleção do usuário
   const rotaAtiva: RotaOpcao | null = rotas
     ? rotas[`rota${rotaSelecionada.charAt(0).toUpperCase() + rotaSelecionada.slice(1)}` as keyof RotaResponse]
     : null;
 
-  // Busca por texto (botão 🔍)
-  const buscarRota = async (
-    endereco: string,
-    origem: [number, number]
-  ) => {
+  const buscarRota = async (endereco: string, origem: [number, number]) => {
     if (!endereco.trim()) return;
     setCarregando(true);
     setErro(null);
@@ -40,7 +35,6 @@ export function useRota() {
     }
   };
 
-  // Busca por coordenadas (autocomplete)
   const buscarRotaPorCoordenadas = async (
     coordDestino: [number, number],
     origem: [number, number]
@@ -57,7 +51,6 @@ export function useRota() {
     }
   };
 
-  // Lógica interna — chama o backend
   const _calcularRotas = async (
     origem: [number, number],
     coordDestino: [number, number]
@@ -66,18 +59,17 @@ export function useRota() {
     console.log('📡 [ROTA] Calculando rotas via backend...');
 
     const resultado = await calcularRotasBackend(
-      origem[1], origem[0],       // lat, lng
-      coordDestino[1], coordDestino[0] // lat, lng
+      origem[1], origem[0],
+      coordDestino[1], coordDestino[0]
     );
 
     console.log('✅ [ROTA] Rotas recebidas:', {
-      segura: resultado.rotaSegura.nivelSeguranca,
-      rapida: resultado.rotaRapida.nivelSeguranca,
-      equilibrada: resultado.rotaEquilibrada.nivelSeguranca,
+      segura: { nivel: resultado.rotaSegura.nivelSeguranca, distancia: resultado.rotaSegura.distanciaKm },
+      rapida: { nivel: resultado.rotaRapida.nivelSeguranca, distancia: resultado.rotaRapida.distanciaKm },
     });
 
     setRotas(resultado);
-    setRotaSelecionada('segura'); // sempre começa na segura
+    setRotaSelecionada('segura');
   };
 
   const limparRota = () => {
@@ -87,7 +79,6 @@ export function useRota() {
     setRotaSelecionada('segura');
   };
 
-  // Dados formatados da rota ativa para o BuscaDestino
   const distancia = rotaAtiva
     ? `${rotaAtiva.distanciaKm.toFixed(1)} km`
     : undefined;

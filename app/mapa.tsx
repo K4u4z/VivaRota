@@ -4,6 +4,7 @@ import { MarcadoresIncidentes } from "@/components/MarcadoresIncidentes";
 import { MenuLateral } from "@/components/MenuLateral";
 import { RotaMapa } from "@/components/RotaMapa";
 import { SeletorRota } from "@/components/SeletorRotal";
+import { BotaoEmergencia } from "@/components/BotaoEmergencia";
 import { useIncidentes } from "@/hooks/useIncidentes";
 import { Incidente } from "@/services/alertas";
 import { useRota } from "@/hooks/useRota";
@@ -84,14 +85,21 @@ export default function MapScreen() {
 
   return (
     <View style={styles.container}>
-      <MapboxGL.MapView style={styles.map} onPress={() => setIncidenteSelecionado(null)}>
+      <MapboxGL.MapView
+        style={styles.map}
+        onPress={() => setIncidenteSelecionado(null)}
+      >
         <MapboxGL.Camera
           ref={cameraRef}
           zoomLevel={15}
           centerCoordinate={location}
           animationMode="flyTo"
         />
-        <MarcadoresIncidentes incidentes={incidentes} onPress={(inc) => setIncidenteSelecionado(inc)} />
+
+        <MarcadoresIncidentes
+          incidentes={incidentes}
+          onPress={(inc) => setIncidenteSelecionado(inc)}
+        />
 
         <MapboxGL.UserLocation visible={true} />
 
@@ -105,7 +113,10 @@ export default function MapScreen() {
       </MapboxGL.MapView>
 
       {/* Botão recentralizar */}
-      <TouchableOpacity style={styles.btnLocalizacao} onPress={voltarParaLocalizacao}>
+      <TouchableOpacity
+        style={styles.btnLocalizacao}
+        onPress={voltarParaLocalizacao}
+      >
         <Text style={styles.btnIcon}>📍</Text>
       </TouchableOpacity>
 
@@ -116,6 +127,9 @@ export default function MapScreen() {
       >
         <Text style={styles.btnIcon}>⚠️</Text>
       </TouchableOpacity>
+
+      {/* Botão SOS */}
+      <BotaoEmergencia />
 
       <BuscaDestino
         onBuscarTexto={(endereco) => buscarRota(endereco, location)}
@@ -140,7 +154,10 @@ export default function MapScreen() {
       )}
 
       {incidenteSelecionado && (
-        <CardDetalheIncidente incidente={incidenteSelecionado} onFechar={() => setIncidenteSelecionado(null)} />
+        <CardDetalheIncidente
+          incidente={incidenteSelecionado}
+          onFechar={() => setIncidenteSelecionado(null)}
+        />
       )}
 
       <MenuLateral aberto={menuAberto} onFechar={() => setMenuAberto(false)} />

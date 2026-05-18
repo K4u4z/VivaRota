@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -14,11 +14,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
 import { Colors } from '@/constants/Colors';
 
 type Contact = { id: string; name: string; phone: string };
 
 const MAX = 5;
+const CHAVE = 'contatos_emergencia';
 
 function ContactCard({ contact, onDelete }: { contact: Contact; onDelete: () => void }) {
   const initial = contact.name.trim().charAt(0).toUpperCase();
@@ -46,15 +48,25 @@ function formatPhone(raw: string): string {
 }
 
 export default function ContatosEmergencia() {
-  const [contacts, setContacts] = useState<Contact[]>([
-    { id: '1', name: 'Mãe', phone: '(11) 99999-0001' },
-    { id: '2', name: 'Pai', phone: '(11) 99999-0002' },
-  ]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
 
-  const handleAdd = () => {
+  // Carrega contatos salvos ao abrir
+  useEffect(() => {
+    SecureStore.getItemAsync(CHAVE).then(dados => {
+      if (dados) setContacts(JSON.parse(dados));
+    });
+  }, []);
+
+  // Salva e atualiza estado
+  async function salvar(lista: Contact[]) {
+    await SecureStore.setItemAsync(CHAVE, JSON.stringify(lista));
+    setContacts(lista);
+  }
+
+  const handleAdd = async () => {
     const n = name.trim();
     const p = phone.trim();
     if (!n || !p) {
@@ -65,7 +77,8 @@ export default function ContatosEmergencia() {
       Alert.alert('Telefone inválido', 'Digite um número com DDD (ex: (11) 99999-9999).');
       return;
     }
-    setContacts(prev => [...prev, { id: Date.now().toString(), name: n, phone: p }]);
+    const novaLista = [...contacts, { id: Date.now().toString(), name: n, phone: p }];
+    await salvar(novaLista);
     setName('');
     setPhone('');
     setShowForm(false);
@@ -77,7 +90,10 @@ export default function ContatosEmergencia() {
       {
         text: 'Remover',
         style: 'destructive',
-        onPress: () => setContacts(prev => prev.filter(c => c.id !== id)),
+        onPress: async () => {
+          const novaLista = contacts.filter(c => c.id !== id);
+          await salvar(novaLista);
+        },
       },
     ]);
   };
@@ -99,7 +115,7 @@ export default function ContatosEmergencia() {
           <View style={styles.banner}>
             <MaterialCommunityIcons name="information-outline" size={20} color={Colors.primary} />
             <Text style={styles.bannerText}>
-              Em caso de emergência (SOS), sua localização em tempo real será enviada para esses contatos.
+              Em caso de emergência (SOS), sua localização em tempo real será enviada para esses contatos via SMS.
             </Text>
           </View>
 
@@ -191,7 +207,6 @@ export default function ContatosEmergencia() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   scroll: { padding: 16, paddingBottom: 40 },
-
   banner: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -202,7 +217,6 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   bannerText: { flex: 1, fontSize: 13, color: Colors.primaryDark, lineHeight: 19 },
-
   listHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -211,7 +225,6 @@ const styles = StyleSheet.create({
   },
   listTitle: { fontSize: 16, fontWeight: '700', color: Colors.text },
   listCount: { fontSize: 13, color: Colors.textMuted, fontWeight: '500' },
-
   contactCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -236,11 +249,9 @@ const styles = StyleSheet.create({
   contactName: { fontSize: 15, fontWeight: '600', color: Colors.text, marginBottom: 2 },
   contactPhone: { fontSize: 13, color: Colors.textSecondary },
   deleteBtn: { padding: 4 },
-
   empty: { alignItems: 'center', paddingVertical: 32, gap: 10 },
   emptyTitle: { fontSize: 17, fontWeight: '700', color: Colors.text },
   emptyBody: { fontSize: 13, color: Colors.textSecondary, textAlign: 'center', lineHeight: 19 },
-
   addBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -254,7 +265,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   addBtnText: { color: Colors.primary, fontWeight: '600', fontSize: 15 },
-
   limitBanner: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -265,7 +275,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   limitText: { fontSize: 13, color: Colors.success, fontWeight: '500' },
-
   form: {
     backgroundColor: Colors.card,
     borderRadius: 16,

@@ -38,6 +38,11 @@ export function MenuLateral({ aberto, onFechar }: Props) {
 
   if (!aberto) return null;
 
+  const navegar = (rota: string) => {
+    onFechar();
+    setTimeout(() => router.push(rota as any), 300);
+  };
+
   return (
     <>
       {/* Overlay */}
@@ -49,18 +54,24 @@ export function MenuLateral({ aberto, onFechar }: Props) {
       >
         {/* Logo */}
         <View style={styles.menuHeader}>
-          <Image
-            source={require("../assets/images/Logo VivaRota Fundo.png")}
-            style={styles.menuLogo}
-            resizeMode="contain"
-          />
+          <View style={styles.logoContainer}>
+            <Image
+              source={require("../assets/images/Logo VivaRota Fundo.png")}
+              style={styles.menuLogo}
+              resizeMode="contain"
+            />
+          </View>
           <Text style={styles.menuAppNome}>VivaRota</Text>
         </View>
 
         <View style={styles.divider} />
 
         {/* Perfil */}
-        <TouchableOpacity style={styles.menuItem} activeOpacity={0.7} onPress={() => { onFechar(); setTimeout(() => router.push("/perfil"), 300); }}>
+        <TouchableOpacity
+          style={styles.menuItem}
+          activeOpacity={0.7}
+          onPress={() => navegar("/perfil")}
+        >
           <View style={styles.menuIcone}>
             <Text style={styles.menuIconeTexto}>👤</Text>
           </View>
@@ -69,6 +80,21 @@ export function MenuLateral({ aberto, onFechar }: Props) {
             <Text style={styles.menuItemSubtexto}>
               {nomeUsuario ?? "Usuário"}
             </Text>
+          </View>
+        </TouchableOpacity>
+
+        {/* Contatos de Emergência */}
+        <TouchableOpacity
+          style={styles.menuItem}
+          activeOpacity={0.7}
+          onPress={() => navegar("/contatos-emergencia")}
+        >
+          <View style={[styles.menuIcone, { backgroundColor: "#FEE2E2" }]}>
+            <Text style={styles.menuIconeTexto}>🆘</Text>
+          </View>
+          <View>
+            <Text style={styles.menuItemTexto}>Contatos de Emergência</Text>
+            <Text style={styles.menuItemSubtexto}>Configurar SOS</Text>
           </View>
         </TouchableOpacity>
 
@@ -124,6 +150,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 20,
     gap: 8,
+  },
+  logoContainer: {
+    backgroundColor: "#0A0A1A",
+    borderRadius: 16,
+    padding: 8,
+    width: 106,
+    height: 106,
+    alignItems: "center",
+    justifyContent: "center",
   },
   menuLogo: {
     width: 90,

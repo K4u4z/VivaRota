@@ -1,4 +1,10 @@
-import React, { useRef, useState } from 'react';
+import { Colors } from "@/constants/Colors";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
+import * as Location from "expo-location";
+import * as SecureStore from "expo-secure-store";
+import * as SMS from "expo-sms";
+import React, { useRef, useState } from "react";
 import {
   Animated,
   Modal,
@@ -8,20 +14,18 @@ import {
   TouchableOpacity,
   Vibration,
   View,
-} from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
-import * as Location from 'expo-location';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Colors } from '@/constants/Colors';
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const HOLD_DURATION = 3000;
+const CHAVE = "contatos_emergencia";
 
 export function BotaoEmergencia() {
   const insets = useSafeAreaInsets();
   const [isHolding, setIsHolding] = useState(false);
   const [countdown, setCountdown] = useState(3);
   const [modalVisible, setModalVisible] = useState(false);
+  const [enviando, setEnviando] = useState(false);
 
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const rippleScale = useRef(new Animated.Value(1)).current;
@@ -36,8 +40,16 @@ export function BotaoEmergencia() {
     rippleScale.setValue(1);
     rippleOpacity.setValue(0.7);
     const anim = Animated.parallel([
-      Animated.timing(rippleScale, { toValue: 2.6, duration: 900, useNativeDriver: true }),
-      Animated.timing(rippleOpacity, { toValue: 0, duration: 900, useNativeDriver: true }),
+      Animated.timing(rippleScale, {
+        toValue: 2.6,
+        duration: 900,
+        useNativeDriver: true,
+      }),
+      Animated.timing(rippleOpacity, {
+        toValue: 0,
+        duration: 900,
+        useNativeDriver: true,
+      }),
     ]);
     rippleAnimRef.current = anim;
     anim.start(({ finished }) => {
@@ -47,7 +59,11 @@ export function BotaoEmergencia() {
 
   const stopRipple = () => {
     rippleAnimRef.current?.stop();
-    Animated.timing(rippleOpacity, { toValue: 0, duration: 200, useNativeDriver: true }).start();
+    Animated.timing(rippleOpacity, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
   };
 
   const startHold = () => {
@@ -56,8 +72,10 @@ export function BotaoEmergencia() {
     setCountdown(3);
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-
-    Animated.spring(scaleAnim, { toValue: 1.12, useNativeDriver: true }).start();
+    Animated.spring(scaleAnim, {
+      toValue: 1.12,
+      useNativeDriver: true,
+    }).start();
     startRipple();
 
     let count = 2;
@@ -95,35 +113,83 @@ export function BotaoEmergencia() {
     Vibration.vibrate([0, 300, 150, 300, 150, 300]);
     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
 
-    try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status === 'granted') {
-        await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
-        // TODO: POST location to /api/sos com contatos de emergência do usuário
-      }
-    } catch {
-      // Envia alerta mesmo sem localização
-    }
+    setEnviando(true);
 
-    setModalVisible(true);
+    try {
+      // Pega localização atual
+      let linkMapa = "Localização indisponível";
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status === "granted") {
+          const loc = await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.High,
+          });
+          const { latitude, longitude } = loc.coords;
+          linkMapa = `https://maps.google.com/?q=${latitude},${longitude}`;
+        }
+      } catch {
+        // Continua sem localização
+      }
+
+      // Busca contatos salvos
+      const dados = await SecureStore.getItemAsync(CHAVE);
+      const contatos = dados ? JSON.parse(dados) : [];
+
+      if (contatos.length === 0) {
+        setEnviando(false);
+        setModalVisible(true);
+        return;
+      }
+
+      // Verifica se SMS está disponível
+      const disponivel = await SMS.isAvailableAsync();
+      if (disponivel) {
+        const numeros = contatos.map((c: any) => c.phone.replace(/\D/g, ""));
+        const mensagem =
+          `🆘 EMERGÊNCIA! Preciso de ajuda!\n` +
+          `📍 Minha localização: ${linkMapa}\n` +
+          `Enviado pelo VivaRota`;
+
+        await SMS.sendSMSAsync(numeros, mensagem);
+      }
+    } catch (error) {
+      console.log("❌ [SOS] Erro:", error);
+    } finally {
+      setEnviando(false);
+      setModalVisible(true);
+    }
   };
+
+  const larguraBarra = rippleScale.interpolate({
+    inputRange: [1, 2.6],
+    outputRange: ["0%", "100%"],
+  });
 
   return (
     <>
       <View
-        style={[styles.container, { bottom: 28 + insets.bottom }]}
+        style={[styles.container, { bottom: 240 + insets.bottom }]}
         pointerEvents="box-none"
       >
         <Animated.View
-          style={[styles.ripple, { transform: [{ scale: rippleScale }], opacity: rippleOpacity }]}
+          style={[
+            styles.ripple,
+            { transform: [{ scale: rippleScale }], opacity: rippleOpacity },
+          ]}
           pointerEvents="none"
         />
         <Pressable onPressIn={startHold} onPressOut={cancelHold}>
-          <Animated.View style={[styles.button, { transform: [{ scale: scaleAnim }] }]}>
+          <Animated.View
+            style={[styles.button, { transform: [{ scale: scaleAnim }] }]}
+          >
             {isHolding ? (
               <Text style={styles.countdown}>{countdown}</Text>
             ) : (
-              <MaterialCommunityIcons name="alarm-light" size={30} color={Colors.white} />
+              <MaterialCommunityIcons
+                name="alarm-light"
+                size={30}
+                color={Colors.white}
+              />
             )}
           </Animated.View>
         </Pressable>
@@ -139,22 +205,39 @@ export function BotaoEmergencia() {
         )}
       </View>
 
-      <Modal transparent visible={modalVisible} animationType="fade" statusBarTranslucent>
+      {/* Modal confirmação */}
+      <Modal
+        transparent
+        visible={modalVisible}
+        animationType="fade"
+        statusBarTranslucent
+      >
         <View style={styles.overlay}>
           <View style={styles.modalCard}>
             <View style={styles.modalIcon}>
-              <MaterialCommunityIcons name="alarm-light" size={44} color={Colors.emergency} />
+              <MaterialCommunityIcons
+                name="alarm-light"
+                size={44}
+                color={Colors.emergency}
+              />
             </View>
             <Text style={styles.modalTitle}>SOS Acionado!</Text>
             <Text style={styles.modalBody}>
-              Sua localização foi enviada para seus contatos de emergência. Ajuda está a caminho.
+              Sua localização foi enviada para seus contatos de emergência via
+              SMS.
             </Text>
             <TouchableOpacity
               style={styles.cancelModal}
               onPress={() => setModalVisible(false)}
             >
-              <MaterialCommunityIcons name="check-circle" size={18} color={Colors.success} />
-              <Text style={styles.cancelModalText}>Estou bem — Cancelar alerta</Text>
+              <MaterialCommunityIcons
+                name="check-circle"
+                size={18}
+                color={Colors.success}
+              />
+              <Text style={styles.cancelModalText}>
+                Estou bem — Cancelar alerta
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -167,26 +250,26 @@ const BTN = 60;
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
+    position: "absolute",
     right: 20,
-    alignItems: 'center',
+    alignItems: "center",
     zIndex: 999,
   },
   ripple: {
-    position: 'absolute',
+    position: "absolute",
     width: BTN,
     height: BTN,
     borderRadius: BTN / 2,
     backgroundColor: Colors.emergency,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   button: {
     width: BTN,
     height: BTN,
     borderRadius: BTN / 2,
     backgroundColor: Colors.emergency,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     shadowColor: Colors.emergency,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.5,
@@ -196,7 +279,7 @@ const styles = StyleSheet.create({
   countdown: {
     color: Colors.white,
     fontSize: 26,
-    fontWeight: '800',
+    fontWeight: "800",
   },
   label: {
     marginTop: 4,
@@ -208,7 +291,7 @@ const styles = StyleSheet.create({
   labelText: {
     color: Colors.white,
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: "700",
     letterSpacing: 1,
   },
   holdLabel: {
@@ -221,21 +304,21 @@ const styles = StyleSheet.create({
   holdLabelText: {
     color: Colors.white,
     fontSize: 10,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.65)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0,0,0,0.65)",
+    justifyContent: "center",
+    alignItems: "center",
     padding: 28,
   },
   modalCard: {
     backgroundColor: Colors.card,
     borderRadius: 24,
     padding: 28,
-    alignItems: 'center',
-    width: '100%',
+    alignItems: "center",
+    width: "100%",
     gap: 14,
   },
   modalIcon: {
@@ -243,35 +326,35 @@ const styles = StyleSheet.create({
     height: 80,
     borderRadius: 40,
     backgroundColor: Colors.emergencyLight,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   modalTitle: {
     fontSize: 22,
-    fontWeight: '800',
+    fontWeight: "800",
     color: Colors.emergency,
   },
   modalBody: {
     fontSize: 15,
     color: Colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 22,
   },
   cancelModal: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
     backgroundColor: Colors.successLight,
     paddingHorizontal: 20,
     paddingVertical: 14,
     borderRadius: 14,
-    width: '100%',
-    justifyContent: 'center',
+    width: "100%",
+    justifyContent: "center",
     marginTop: 4,
   },
   cancelModalText: {
     color: Colors.success,
-    fontWeight: '700',
+    fontWeight: "700",
     fontSize: 15,
   },
 });

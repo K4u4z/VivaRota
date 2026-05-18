@@ -25,7 +25,10 @@
       "package": "com.vivarota.app",
       "permissions": [
         "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION"
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.VIBRATE",
+        "android.permission.POST_NOTIFICATIONS"
       ]
     },
     "plugins": [
@@ -37,7 +40,15 @@
           "RNMapboxMapsDownloadToken": "sk.eyJ1IjoibGVvd29yazIwIiwiYSI6ImNtb2RudmpmODA1NncycW9rOGVnYWpxdDcifQ.V9Yy34mnvWFCXpksb2PJXw"
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#233E32",
+          "sounds": []
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
@@ -45,9 +56,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "df3ddfb3-0aa5-4151-b3b0-308b1d796599"
+        "projectId": "61d8762a-6c9c-482f-aa93-da9a3aab58c9"
       }
     },
-    "owner": "leo.work2077"
+    "owner": "kauaz17"
   }
 }

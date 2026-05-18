@@ -6,13 +6,12 @@ export interface RotaOpcao {
   duracaoMin: number;
   pontuacaoPerigo: number;
   nivelSeguranca: 'seguro' | 'atencao' | 'moderado' | 'perigoso';
-  tipo: 'segura' | 'rapida' | 'equilibrada';
+  tipo: 'segura' | 'rapida';
 }
 
 export interface RotaResponse {
   rotaSegura: RotaOpcao;
   rotaRapida: RotaOpcao;
-  rotaEquilibrada: RotaOpcao;
 }
 
 export async function calcularRotasBackend(

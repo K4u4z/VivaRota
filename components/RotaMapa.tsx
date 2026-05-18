@@ -1,6 +1,6 @@
 import MapboxGL from '@rnmapbox/maps';
-import { RotaResponse } from '@/services/rotas'; // ← importar de services/rotas
-import { TipoRota } from '@/hooks/useRota';      // ← TipoRota continua do hook
+import { RotaResponse } from '@/services/rotas';
+import { TipoRota } from '@/hooks/useRota';
 
 interface Props {
   rotas: RotaResponse;
@@ -9,19 +9,17 @@ interface Props {
 }
 
 const CORES_ROTA = {
-  segura:      '#4CAF50', // verde
-  rapida:      '#F44336', // vermelho
-  equilibrada: '#2196F3', // azul
+  segura: '#4CAF50',
+  rapida: '#F44336',
 };
 
 const CORES_INATIVA = {
-  segura:      '#A5D6A7', // verde claro
-  rapida:      '#EF9A9A', // vermelho claro
-  equilibrada: '#90CAF9', // azul claro
+  segura: '#A5D6A7',
+  rapida: '#EF9A9A',
 };
 
 export function RotaMapa({ rotas, rotaSelecionada, destino }: Props) {
-  const tipos: TipoRota[] = ['equilibrada', 'rapida', 'segura']; // ordem importa — selecionada por último
+  const tipos: TipoRota[] = ['rapida', 'segura'];
 
   return (
     <>
@@ -51,9 +49,7 @@ export function RotaMapa({ rotas, rotaSelecionada, destino }: Props) {
             <MapboxGL.LineLayer
               id={`rotaLine_${tipo}`}
               style={{
-                lineColor: ativa
-                  ? CORES_ROTA[tipo]
-                  : CORES_INATIVA[tipo],
+                lineColor: ativa ? CORES_ROTA[tipo] : CORES_INATIVA[tipo],
                 lineWidth: ativa ? 5 : 3,
                 lineCap: 'round',
                 lineJoin: 'round',
@@ -64,11 +60,7 @@ export function RotaMapa({ rotas, rotaSelecionada, destino }: Props) {
         );
       })}
 
-      {/* Marcador de destino */}
-      <MapboxGL.PointAnnotation
-        id="destino"
-        coordinate={destino}
-      >
+      <MapboxGL.PointAnnotation id="destino" coordinate={destino}>
         <MapboxGL.Callout title="Destino" />
       </MapboxGL.PointAnnotation>
     </>

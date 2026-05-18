@@ -12,12 +12,14 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 import { useAuthStore } from "@/services/authStore";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const [erros, setErros] = useState({ email: "", senha: "" });
 
   const { fazerLogin, carregando, erro, limparErro } = useAuthStore();
@@ -79,18 +81,30 @@ export default function LoginScreen() {
           {/* Senha */}
           <View style={styles.field}>
             <Text style={styles.label}>Senha</Text>
-            <TextInput
-              style={[styles.input, erros.senha ? styles.inputErro : null]}
-              placeholder="••••••••••"
-              placeholderTextColor="#BDBDBD"
-              secureTextEntry
-              value={senha}
-              onChangeText={(v) => {
-                setSenha(v);
-                setErros((e) => ({ ...e, senha: "" }));
-                limparErro();
-              }}
-            />
+            <View style={styles.senhaContainer}>
+              <TextInput
+                style={[styles.inputSenha, erros.senha ? styles.inputErro : null]}
+                placeholder="••••••••••"
+                placeholderTextColor="#BDBDBD"
+                secureTextEntry={!mostrarSenha}
+                value={senha}
+                onChangeText={(v) => {
+                  setSenha(v);
+                  setErros((e) => ({ ...e, senha: "" }));
+                  limparErro();
+                }}
+              />
+              <Pressable
+                style={styles.olhoBtn}
+                onPress={() => setMostrarSenha(!mostrarSenha)}
+              >
+                <Ionicons
+                  name={mostrarSenha ? "eye-off-outline" : "eye-outline"}
+                  size={22}
+                  color="#9E9E9E"
+                />
+              </Pressable>
+            </View>
             {erros.senha ? <Text style={styles.erro}>{erros.senha}</Text> : null}
           </View>
 
@@ -178,6 +192,23 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     fontSize: 15,
     color: "#1A1A1A",
+  },
+  senhaContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F5F5F5",
+    borderRadius: 10,
+  },
+  inputSenha: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 15,
+    color: "#1A1A1A",
+  },
+  olhoBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 14,
   },
   erroContainer: {
     backgroundColor: "#FFF0F0",
