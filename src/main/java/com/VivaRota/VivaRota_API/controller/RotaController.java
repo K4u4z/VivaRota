@@ -19,15 +19,15 @@ public class RotaController {
     @Autowired
     private RotaService rotaService;
 
-    // POST /rotas/calcular
     @PostMapping("/calcular")
     public ResponseEntity<RotaResponseDTO> calcular(
             @RequestBody @Valid RotaRequestDTO dto,
             @AuthenticationPrincipal UserDetails userDetails) {
 
+        String email = userDetails != null ? userDetails.getUsername() : "anonimo@vivarota.com";
+
         return ResponseEntity.ok(
-                rotaService.calcular(dto, userDetails.getUsername())
+                rotaService.calcular(dto, email)
         );
     }
 }
-

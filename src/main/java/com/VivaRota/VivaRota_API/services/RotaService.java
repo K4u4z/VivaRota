@@ -51,7 +51,7 @@ public class RotaService {
         // Mínimo de 0.003° (~300m) para trajetos muito curtos.
         double dLat = Math.abs(destLat - origemLat);
         double dLng = Math.abs(destLng - origemLng);
-        double escala = Math.max(Math.sqrt(dLat * dLat + dLng * dLng) * 0.25, 0.003);
+        double escala = Math.max(Math.sqrt(dLat * dLat + dLng * dLng) * 0.25, 0.004);
 
         double[][] desvios = {
             { 0.0,           escala       },  // leste
@@ -205,7 +205,7 @@ public class RotaService {
 
     private double calcularPerigo(String wkt) {
         Double resultado = jdbcTemplate.queryForObject(
-                "SELECT calcular_perigo_rota(?, 500)", Double.class, wkt);
+                "SELECT calcular_perigo_rota(?, 700)", Double.class, wkt);
         return resultado != null ? resultado : 0.0;
     }
 
