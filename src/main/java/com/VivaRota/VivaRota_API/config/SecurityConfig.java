@@ -46,6 +46,7 @@ public class SecurityConfig {
                                 "/v3/api-docs"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/incidentes/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/rotas/segura").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/incidentes/*/confirmar").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
