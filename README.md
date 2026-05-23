@@ -6,15 +6,90 @@ Permite que usuários reportem incidentes em tempo real (assaltos, falta de ilum
 
 ---
 
-## 📱 Testar o App (Android)
+## 📱 Instalar o App (Android)
 
-> **[⬇️ Download do APK](https://expo.dev/accounts/leo.work2077/projects/VivaRota-App/builds/09362ffd-e24c-4e7b-ac59-e2c27c654218)**
+> **[⬇️ Download do APK](https://expo.dev/accounts/leo.work2077/projects/VivaRota-App/builds/bd6cfe7c-2b0d-4ecf-adf0-2b67643382f9)**
+
+https://expo.dev/accounts/leo.work2077/projects/VivaRota-App/builds/bd6cfe7c-2b0d-4ecf-adf0-2b67643382f9
 
 > ⚠️ **Importante:** O link do APK só funciona se você estiver **deslogado do Expo** ou abrindo em uma **aba anônima** do navegador.
 
 1. Acesse o link acima em aba anônima
-2. Baixe e instale o APK no Android
-3. Abra o app — backend e banco já estão em produção, não precisa configurar nada
+2. Baixe e instale o APK no celular Android
+3. O app ficará aguardando conexão com o servidor Expo — siga as instruções abaixo para rodar o projeto
+
+---
+
+## 🚀 Rodar o Projeto
+
+O backend já está hospedado no Railway e o banco no Supabase — **não precisa configurar nada além dos passos abaixo.**
+
+### Opção 1 — Mac/Linux (Terminal)
+
+```bash
+# 1. Clone o repositório
+git clone https://github.com/K4u4z/VivaRota.git
+
+# 2. Entre na pasta do projeto
+cd VivaRota
+
+# 3. Copie o arquivo de variáveis de ambiente
+# (já vem com tudo preenchido, não precisa alterar nada)
+cp .env.example .env
+
+# 4. Instale as dependências
+npm install
+
+# 5. Inicie o servidor Expo
+npx expo start
+```
+
+6. No terminal aparecerá um QR code — pressione **`s`** para modo development build
+7. Abra o app VivaRota no celular e escaneie o QR code
+
+---
+
+### Opção 2 — Windows (CMD)
+
+```cmd
+git clone https://github.com/K4u4z/VivaRota.git
+cd VivaRota
+copy .env.example .env
+npm install
+npx expo start
+```
+
+6. No terminal aparecerá um QR code — pressione **`s`** para modo development build
+7. Abra o app VivaRota no celular e escaneie o QR code
+
+---
+
+### Opção 3 — Windows (PowerShell)
+
+```powershell
+git clone https://github.com/K4u4z/VivaRota.git
+cd VivaRota
+Copy-Item .env.example .env
+npm install
+npx expo start
+```
+
+6. No terminal aparecerá um QR code — pressione **`s`** para modo development build
+7. Abra o app VivaRota no celular e escaneie o QR code
+
+---
+
+### Opção 4 — VSCode (qualquer sistema)
+
+1. Abra o VSCode
+2. Clique em **View → Command Palette** (ou `Ctrl+Shift+P` / `Cmd+Shift+P`)
+3. Digite **"Git: Clone"** e pressione Enter
+4. Cole a URL: `https://github.com/K4u4z/VivaRota.git` e escolha onde salvar
+5. Quando perguntar se deseja abrir o repositório, clique em **"Open"**
+6. Abra o terminal integrado: **Terminal → New Terminal** (ou `Ctrl+` `` ` ``)
+7. Execute os comandos conforme seu sistema operacional (Opção 1, 2 ou 3 acima)
+8. No terminal aparecerá um QR code — pressione **`s`** para modo development build
+9. Abra o app VivaRota no celular e escaneie o QR code
 
 ---
 
@@ -132,50 +207,6 @@ Permite que usuários reportem incidentes em tempo real (assaltos, falta de ilum
 | PATCH | `/incidentes/{id}/confirmar` | Público | Confirmar alerta |
 | POST | `/rotas/calcular` | JWT | Calcular rota segura e rápida com score de perigo |
 | GET | `/usuarios/{id}` | JWT | Dados do usuário |
-
----
-
-## 💻 Rodar Localmente (para devs do time)
-
-### Pré-requisitos
-- Node.js 18+
-- App VivaRota instalado no celular Android (APK acima)
-
-### Frontend
-
-```bash
-# Clone o repositório
-git clone https://github.com/K4u4z/VivaRota.git
-cd VivaRota
-
-# Copie o arquivo de variáveis de ambiente
-cp .env.example .env
-# O .env.example já vem com a URL do Railway e o token Mapbox preenchidos
-# Não precisa alterar nada!
-
-# Instale dependências
-npm install
-
-# Inicie o Expo
-npx expo start
-# Pressione 's' para development build
-# Escaneie o QR code com o app VivaRota instalado no celular
-```
-
-> ✅ O backend já está rodando no Railway — não precisa subir nada localmente!
-
-### Backend (opcional — só se quiser rodar local)
-
-```bash
-# Entre na branch do backend
-git checkout Versão1
-cd VivaRota
-
-# Configure src/main/resources/application.properties com suas credenciais
-# Inicie o backend
-./mvnw spring-boot:run
-# API disponível em http://localhost:8080
-```
 
 ---
 
