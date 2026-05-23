@@ -31,7 +31,6 @@ public class SecurityFilter extends OncePerRequestFilter {
         "/auth/login",
         "/auth/cadastrar",
         "/usuarios/cadastro",
-        "/incidentes",
         "/rotas/segura",
         "/swagger-ui",
         "/v3/api-docs"
