@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -25,6 +26,22 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    private static final List<String> ROTAS_PUBLICAS = List.of(
+        "/auth/login",
+        "/auth/cadastrar",
+        "/usuarios/cadastro",
+        "/incidentes",
+        "/rotas/segura",
+        "/swagger-ui",
+        "/v3/api-docs"
+    );
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        return ROTAS_PUBLICAS.stream().anyMatch(uri::startsWith);
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
